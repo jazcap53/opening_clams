@@ -208,7 +208,7 @@ class ShucksGame(ABC):
         """Display debug information if in debug mode."""
         if self.debug_mode:
             correct_answer = next(title for title, paths in self.songs.items() if self.current_file in paths)
-            print(f"\nDebug: Correct answer is {correct_answer}")
+            print(f"\nDebug: Correct answer is {correct_answer}\n")
 
     def display_game_over_message(self):
         """Display the game over message."""
@@ -240,6 +240,19 @@ class NormalGameInput(ShucksGame):
     """
     Concrete implementation of ShucksGame with normal user input handling.
     """
+    def play(self):
+        """Main game loop."""
+        self.clear_screen()
+        while self.unguessed_files:
+            self.display_song_list()
+            self.display_debug_info()  # Display debug info right after song list
+            self.display_progress()
+            self.select_and_play_file()
+            if not self.handle_user_interaction():
+                break
+            if self.unguessed_files:
+                self.clear_screen()
+        self.display_game_over_message()
 
     def get_user_input(self) -> str:
         """
@@ -386,9 +399,6 @@ class InteractiveGameInput(ShucksGame):
                     if self.check_guess(self.current_input):
                         break
 
-            if self.debug_mode:
-                self.display_debug_info()
-
             if not self.unguessed_files:
                 break
 
@@ -439,9 +449,10 @@ class InteractiveGameInput(ShucksGame):
         return False
 
     def display_game_state(self):
-        """Display the current game state, including song list and progress."""
+        """Display the current game state, including song list, debug info, and progress."""
         self.clear_screen()
         self.display_song_list()
+        self.display_debug_info()  # Display debug info right after song list
         self.display_progress()
         print("\nPlaying audio... Try to guess the song!")
         print("Press space to replay the audio clip.")
@@ -511,13 +522,6 @@ class InteractiveGameInput(ShucksGame):
         """
         self.current_file = random.choice(self.unguessed_files)
         self.unguessed_files.remove(self.current_file)
-
-    def display_debug_info(self):
-        """Display debug information if in debug mode."""
-        if self.debug_mode:
-            correct_answer = self.get_current_song_title()
-            print(f"\nDebug: Correct answer is {correct_answer}")
-            time.sleep(SLEEP_SECS)
 
     def play_file(self):
         """
