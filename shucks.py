@@ -10,6 +10,7 @@ user interactions such as skipping, replaying, or requesting the answer
 for each audio clip.
 """
 from abc import ABC, abstractmethod
+import argparse
 import os
 import random
 import sys
@@ -357,7 +358,6 @@ class InteractiveGameInput(ShucksGame):
         self.current_file = None
         self.audio_thread = None
         self.stop_audio = threading.Event()
-        self.total_questions = len(self.songs)
 
     def __del__(self):
         """Clean up pygame mixer and audio thread when the object is destroyed."""
@@ -385,6 +385,9 @@ class InteractiveGameInput(ShucksGame):
                     self.display_matches()
                     if self.check_guess(self.current_input):
                         break
+
+            if self.debug_mode:
+                self.display_debug_info()
 
             if not self.unguessed_files:
                 break
@@ -509,6 +512,13 @@ class InteractiveGameInput(ShucksGame):
         self.current_file = random.choice(self.unguessed_files)
         self.unguessed_files.remove(self.current_file)
 
+    def display_debug_info(self):
+        """Display debug information if in debug mode."""
+        if self.debug_mode:
+            correct_answer = self.get_current_song_title()
+            print(f"\nDebug: Correct answer is {correct_answer}")
+            time.sleep(SLEEP_SECS)
+
     def play_file(self):
         """
         Play the audio file once in a separate thread.
@@ -561,31 +571,19 @@ def main():
     Main function to run the Shucks game.
 
     Parses command-line arguments and initializes the game.
-    Accepted command-line arguments:
-    -d: Debug mode
-    -i or -I: Interactive mode (currently ignored, placeholder for future functionality)
-    <integer>: Number of files to use in the game
-
-    The function creates and runs an instance of NormalGameInput with the parsed settings.
     """
-    debug_mode = False
-    num_files = None
-    interactive_switch = False  # This is unused for now, but we'll parse it
+    parser = argparse.ArgumentParser(description="Shucks: A musical guessing game.")
+    parser.add_argument("-d", "--debug", action="store_true", help="Run in debug mode")
+    parser.add_argument("-i", "--interactive", action="store_true", help="Run in interactive mode")
+    parser.add_argument("num_files", nargs="?", type=int, default=None, help="Number of files to use in the game")
 
-    # Parse command-line arguments
-    for arg in sys.argv[1:]:
-        if arg.lower() == '-d':
-            debug_mode = True
-        elif arg.lower() in ['-i', '-I']:
-            interactive_switch = True  # This is set but not used yet
-        elif arg.isdigit():
-            num_files = int(arg)
+    args = parser.parse_args()
 
     try:
-        if interactive_switch:
-            game = InteractiveGameInput(debug_mode, num_files)
+        if args.interactive:
+            game = InteractiveGameInput(debug_mode=args.debug, num_files=args.num_files)
         else:
-            game = NormalGameInput(debug_mode, num_files)
+            game = NormalGameInput(debug_mode=args.debug, num_files=args.num_files)
         game.play()
     except ValueError as e:
         print(f"Error: {str(e)}")
