@@ -461,9 +461,11 @@ class InteractiveGameInput(ShucksGame):
         """
         Display song titles that match the current input.
         If no matches are found, display "Nope." and reset the input.
+        Also display debug information if in debug mode.
         """
         self.clear_screen()
         self.display_song_list()
+        self.display_debug_info()  # Display debug info after song list
         self.display_progress()
         print("\nTry to guess the song!")
         print("Press space to replay the audio clip.")
@@ -496,13 +498,21 @@ class InteractiveGameInput(ShucksGame):
         if len(matches) == 1 and matches[0].lower().startswith(guess.lower()):
             if matches[0] == correct_title:
                 self.stop_audio_and_wait()
-                print("Correct!")
+                self.clear_screen()
+                self.display_song_list()
+                self.display_debug_info()  # Display debug info after song list
+                self.display_progress()
+                print("\nCorrect!")
                 self.correct_answers += 1
                 time.sleep(SLEEP_SECS)
                 self.current_input = ""
                 return True
             else:
-                print("Incorrect guess.")
+                self.clear_screen()
+                self.display_song_list()
+                self.display_debug_info()  # Display debug info after song list
+                self.display_progress()
+                print("\nIncorrect guess.")
                 time.sleep(SLEEP_SECS)
                 self.current_input = ""
         return False
