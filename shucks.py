@@ -240,14 +240,15 @@ class NormalGameInput(ShucksGame):
     """
     Concrete implementation of ShucksGame with normal user input handling.
     """
+
     def play(self):
         """Main game loop."""
         self.clear_screen()
         while self.unguessed_files:
             self.display_song_list()
-            self.display_debug_info()  # Display debug info right after song list
             self.display_progress()
             self.select_and_play_file()
+            self.display_debug_info()  # Move this line after select_and_play_file
             if not self.handle_user_interaction():
                 break
             if self.unguessed_files:
