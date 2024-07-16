@@ -399,6 +399,8 @@ class InteractiveGameInput(ShucksGame):
                     self.display_matches()
                     if self.check_guess(self.current_input):
                         break
+                else:
+                    self.display_matches()  # Add this line to update display for non-processed inputs
 
             if not self.unguessed_files:
                 break
@@ -447,6 +449,7 @@ class InteractiveGameInput(ShucksGame):
             print("Bad input.")
             time.sleep(SLEEP_SECS)
             self.current_input = ""
+            return True  # Return True to trigger a redisplay
         return False
 
     def display_game_state(self):
